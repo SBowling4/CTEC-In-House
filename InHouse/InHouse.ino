@@ -3,7 +3,7 @@
 PRIZM p;
 
 //I had fun
-PDController elevatorPDController(0, 0.); //initialize PD controller object, tune
+PDController elevatorPDController(0, 0); //initialize PD controller object, tune
 
 double encoderTicksToInches[2] = {0, 0}; //initialie conversion array, tune
 
@@ -35,7 +35,7 @@ void setup() {
 
 void loop() {
   totalRotations(); // Track h drive servo rotation
-  p.setMotorPower(elevatorMotorPort, 100 * elevatorPDController.calculate(getDistance(elevatorEncoderPort)); //Calculates needed PD output
+  p.setMotorPower(elevatorMotorPort, 100 * elevatorPDController.calculate(getDistance(elevatorEncoderPort))); //Calculates needed PD output
 }
 
 double getDistance(int channel) {
