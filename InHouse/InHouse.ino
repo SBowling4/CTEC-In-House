@@ -34,8 +34,7 @@ void setup() {
 }
 
 void loop() {
-  // Track h drive servo rotation
-  totalRotations();
+  totalRotations(); // Track h drive servo rotation
   p.setMotorPower(elevatorMotorPort, 100 * elevatorPDController.calculate(getDistance(elevatorEncoderPort)); //Calculates needed PD output
 }
 
@@ -84,7 +83,7 @@ double getHDistance() {
 
 //look familiar mcleod?
 void totalRotations() {
-    double currentRotation = p.readServoPosition(hServoPort); //Find
+    double currentRotation = p.readServoPosition(hServoPort); //Gets the current rotation from servo
 
     // Calculate the delta, accounting for wraparound
     double delta = currentRotation - previousRotation;
@@ -96,9 +95,9 @@ void totalRotations() {
         delta += 1.0; // Wrapped from 0.0 to 1.0 (moving forward)
     }
 
-    // Update cumulative position without relying on fullRotations counter
-    cumulativeRotations -= delta; // Keep negative sign if needed for direction
+    // Update cumulative position 
+    cumulativeRotations += delta; 
 
-    // Store for next calculation
+    // Store for next
     previousRotation = currentRotation;
 }
