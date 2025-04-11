@@ -1,9 +1,9 @@
 #include <PRIZM.h>
-#include "PDController.h"
+#include "PIDController.h"
 PRIZM p;
 
 //I had fun
-PDController elevatorPDController(0, 0); //initialize PD controller object, tune
+PIDController elevatorPIDController(0, 0, 0); //initialize PID controller object, tune
 
 double encoderTicksToInches[2] = {0, 0}; //initialie conversion array, tune
 
@@ -18,8 +18,11 @@ int elevatorMotorPort = 2;
 int leftEncoderPort = 1;
 int elevatorEncoderPort = 2;
 int hServoPort = 3;
-int ultraSonicSensorPort = 3;
-int lineFinderSensorPort = 4;
+int clawServopPort = 4;
+int wristServoPort = 5;
+int ultraSonicSensorPort = 6;
+int lineFinderSensorPort = 7;
+
 
 
 void setup() {
@@ -28,14 +31,14 @@ void setup() {
   // Reset encoders
   p.resetEncoder(leftEncoderPort);
   p.resetEncoder(elevatorEncoderPort);
-  
-  elevatorPDController.setTolerance(0); //tune
+
+  elevatorPIDController.setTolerance(0); //tune, tolerance for elevator at position
   
 }
 
 void loop() {
   totalRotations(); // Track h drive servo rotation
-  p.setMotorPower(elevatorMotorPort, 100 * elevatorPDController.calculate(getDistance(elevatorEncoderPort))); //Calculates needed PD output
+  p.setMotorPower(elevatorMotorPort, 100 * elevatorPIDController.calculate(getDistance(elevatorEncoderPort))); //Calculates needed PD output
 }
 
 double getDistance(int channel) {
@@ -44,12 +47,12 @@ double getDistance(int channel) {
 }
 
 void moveElevatorToPosition(double targetPosition) {
-  elevatorPDController.setSetpoint(targetPosition); //Sets elevator setpoint to new position
+  elevatorPIDController.setSetpoint(targetPosition); //Sets elevator setpoint to new position
 }
 
 void waitUntilElevatorInPosition() {
   //While loop that just stalls code until elevator is ready
-  while (!elevatorPDController.atSetpoint()) {}
+  while (!elevatorPIDController.atSetpoint()) {}
 }
 
 void driveLefthMotorDistance(double inches, int power) {
@@ -78,8 +81,14 @@ void driveHDistance(double inches, int power) {
 }
 
 double getHDistance() {
-  return cumulativeRotations / SERVO_ROTATIONS_PER_INCH; //Finds ditacne by dividing total rotations by conversion factor
+  return cumulativeRotations / SERVO_ROTATIONS_PER_INCH; //Finds distance by dividing total rotations by conversion factor
 }
+
+bool getLF() {
+  return p.readLineSensor(lineFinderSensorPort); //Easier getter for LF sensor
+}
+
+void startToRack() {}
 
 //look familiar mcleod?
 void totalRotations() {
