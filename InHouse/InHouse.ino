@@ -24,7 +24,6 @@ int ultraSonicSensorPort = 6;
 int lineFinderSensorPort = 7;
 
 
-
 void setup() {
   p.PrizmBegin(); //Intialize prizm
   
@@ -33,12 +32,11 @@ void setup() {
   p.resetEncoder(elevatorEncoderPort);
 
   elevatorPIDController.setTolerance(0); //tune, tolerance for elevator at position
-  
 }
 
 void loop() {
   totalRotations(); // Track h drive servo rotation
-  p.setMotorPower(elevatorMotorPort, 100 * elevatorPIDController.calculate(getDistance(elevatorEncoderPort))); //Calculates needed PD output
+  p.setMotorPower(elevatorMotorPort, 100 * elevatorPIDController.calculate(getDistance(elevatorEncoderPort))); //Calculates needed PID output
 }
 
 double getDistance(int channel) {
@@ -51,8 +49,15 @@ void moveElevatorToPosition(double targetPosition) {
 }
 
 void waitUntilElevatorInPosition() {
+  unsigned long startTime = millis() / 1000;
   //While loop that just stalls code until elevator is ready
-  while (!elevatorPIDController.atSetpoint()) {}
+  while (!elevatorPIDController.atSetpoint()) {
+    unsigned long currentTime = millis() / 1000;
+    if (currentTime - startTime > 4) {
+      Serial.println("Unable to move elevator to position within time, cancelling");
+      break;
+    }
+  }
 }
 
 void driveLefthMotorDistance(double inches, int power) {
