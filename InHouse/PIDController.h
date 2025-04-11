@@ -1,10 +1,11 @@
-#ifndef PDCONTROLLER_H
-#define PDCONTROLLER_H
+#ifndef PIDCONTROLLER_H
+#define PIDCONTROLLER_H
 
-class PDController {
+class PIDController {
     public:
         double kp;
         double kd;
+        double ki;
 
         double setpoint;
 
@@ -13,14 +14,20 @@ class PDController {
 
         double tolerance;
 
+        double integral;
+
+
         // Constructor with kp and kd
-        PDController(double kp, double kd);
+        PIDController(double kp, double kd);
+
+        //Constructor with all
+        PIDController(double kp, double ki, double kd);
         
         // Default constructor
-        PDController();
+        PIDController();
         
         // Constructor with just kp
-        PDController(double kp);
+        PIDController(double kp);
 
         // Calculate the control output
         double calculate(double measure);
