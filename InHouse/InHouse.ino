@@ -2,7 +2,7 @@
 #include "PIDController.h"
 PRIZM p;
 
-//I had fun
+//I made this myself, I can add the files to submission if you want
 PIDController elevatorPIDController(0, 0, 0); //initialize PID controller object, tune
 
 double encoderTicksToInches[2] = {0, 0}; //initialie conversion array, tune
