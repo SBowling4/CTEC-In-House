@@ -11,10 +11,13 @@ class PIDController {
 
         unsigned long lastTime;
         double lastError;
+        double error;
 
         double tolerance;
 
-        double integral;
+        double totalError;
+        double minimumIntegral;
+        double maximumIntegral;
 
 
         // Constructor with kp and kd
@@ -23,7 +26,7 @@ class PIDController {
         //Constructor with all
         PIDController(double kp, double ki, double kd);
         
-        // Default constructor
+        // Default constructor, sets to 0
         PIDController();
         
         // Constructor with just kp
@@ -35,11 +38,17 @@ class PIDController {
         // Set tolerance for "at setpoint" determination
         void setTolerance(double tolerance);
 
-        // Check if we're at the setpoint
+        // Check if controller is at the setpoint
         bool atSetpoint();
 
         //Updates setpoint
         void setSetpoint(double setpoint);
+
+        //Sets the minimum and maximum for integral
+        void setIntegralRange(double min, double max);
+
+        //Resets the PIDController
+        void reset();
 };
 
 #endif
