@@ -3,46 +3,29 @@
 #include <stdlib.h>
 
 PIDController::PIDController(double kp, double kd) {
-    this->kp = kp;
-    this->kd = kd;
-    this->ki = 0;
-    this->lastTime = 0;
-    this->lastError = 0;
-    this->tolerance = 0;
-    this->integral = 0;
+  PIDController(kp, 0, kd);
 }
 
 PIDController::PIDController() {
-    this->kp = 0;
-    this->kd = 0;
-    this->ki = 0;
-    this->lastTime = 0;
-    this->lastError = 0;
-    this->tolerance = 0;
-    this->integral = 0;
-
+  PIDController(0, 0, 0);
 }
 
 PIDController::PIDController(double kp) {
-    this->kp = kp;
-    this->kd = 0;
-    this->ki = 0;
-    this->lastTime = 0;
-    this->lastError = 0;
-    this->tolerance = 0;
-    this->integral = 0;
-
+  PIDController(kp, 0, 0);
 }
 
 PIDController::PIDController(double kp, double ki, double kd) {
   this->kp = kp;
   this->ki = ki;
   this->kd = kd;
+
   this->lastTime = 0;
   this->lastError = 0;
+  this->totalError = 0;
+  this->error = 0;
   this->tolerance = 0;
-  this->integral = 0;
-
+  this->maximumIntegral = 1;
+  this->minimumIntegral = -1;
 }
 
 double PIDController::calculate(double measure) {
@@ -53,13 +36,15 @@ double PIDController::calculate(double measure) {
     
     lastTime = currentTime;
 
-    double error = setpoint - measure;
+    error = setpoint - measure;
     double de = error - lastError;
     lastError = error;
 
-    integral += error;
+    totalError = constrain((totalError + error) * dt, minimumIntegral / ki, maximumIntegral / ki);
 
-    return kp * error + kd * (de/dt) + integral * ki;
+    double derivative = de/dt;
+
+    return kp * error + kd * derivative + ki * totalError;
 }
 
 void PIDController::setTolerance(double tolerance) {
@@ -68,7 +53,7 @@ void PIDController::setTolerance(double tolerance) {
 
 bool PIDController::atSetpoint() {
     if (tolerance != 0) {
-        return abs(setpoint - lastError) < tolerance;
+        return abs(error) < tolerance;
     } else {
         return false;
     }
@@ -76,4 +61,15 @@ bool PIDController::atSetpoint() {
 
 void PIDController::setSetpoint(double setpoint) {
     this->setpoint = setpoint;
+}
+
+void PIDController::setIntegralRange(double min, double max) {
+  this->minimumIntegral = min;
+  this->maximumIntegral = max;
+}
+
+void PIDController::reset() {
+  this->totalError = 0;
+  this->lastError = 0;
+  this->error = 0;
 }
