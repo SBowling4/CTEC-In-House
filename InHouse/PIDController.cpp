@@ -1,32 +1,51 @@
-#include "PDController.h"
+#include "PIDController.h"
 #include <Arduino.h>
 #include <stdlib.h>
 
-PDController::PDController(double kp, double kd) {
+PIDController::PIDController(double kp, double kd) {
     this->kp = kp;
     this->kd = kd;
+    this->ki = 0;
     this->lastTime = 0;
     this->lastError = 0;
     this->tolerance = 0;
+    this->integral = 0;
 }
 
-PDController::PDController() {
+PIDController::PIDController() {
     this->kp = 0;
     this->kd = 0;
+    this->ki = 0;
     this->lastTime = 0;
     this->lastError = 0;
     this->tolerance = 0;
+    this->integral = 0;
+
 }
 
-PDController::PDController(double kp) {
+PIDController::PIDController(double kp) {
     this->kp = kp;
     this->kd = 0;
+    this->ki = 0;
     this->lastTime = 0;
     this->lastError = 0;
     this->tolerance = 0;
+    this->integral = 0;
+
 }
 
-double PDController::calculate(double measure) {
+PIDController::PIDController(double kp, double ki, double kd) {
+  this->kp = kp;
+  this->ki = ki;
+  this->kd = kd;
+  this->lastTime = 0;
+  this->lastError = 0;
+  this->tolerance = 0;
+  this->integral = 0;
+
+}
+
+double PIDController::calculate(double measure) {
     // Get current time
     unsigned long currentTime = millis();
     double dt = (currentTime - lastTime) / 1000.0; // Convert to seconds
@@ -38,14 +57,16 @@ double PDController::calculate(double measure) {
     double de = error - lastError;
     lastError = error;
 
-    return kp * error + kd * (de/dt);
+    integral += error;
+
+    return kp * error + kd * (de/dt) + integral * ki;
 }
 
-void PDController::setTolerance(double tolerance) {
+void PIDController::setTolerance(double tolerance) {
     this->tolerance = tolerance;
 }
 
-bool PDController::atSetpoint() {
+bool PIDController::atSetpoint() {
     if (tolerance != 0) {
         return abs(setpoint - lastError) < tolerance;
     } else {
@@ -53,6 +74,6 @@ bool PDController::atSetpoint() {
     }
 }
 
-void PDController::setSetpoint(double setpoint) {
+void PIDController::setSetpoint(double setpoint) {
     this->setpoint = setpoint;
 }
