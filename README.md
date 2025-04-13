@@ -6,3 +6,5 @@ Programmer: Sam Bowling
 Systems Engineer: Xavier
 
 Mentor: Jackson Pursell
+
+Cooler Mentor: Carter Tollman :)
