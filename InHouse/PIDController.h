@@ -32,13 +32,13 @@ class PIDController {
         // Constructor with just kp
         PIDController(double kp);
 
-        // Calculate the control output
+        // Calculate the control output, should be called periodically
         double calculate(double measure);
 
         // Set tolerance for "at setpoint" determination
         void setTolerance(double tolerance);
 
-        // Check if controller is at the setpoint
+        // Check if controller is at the setpoint using tolerance
         bool atSetpoint();
 
         //Updates setpoint
