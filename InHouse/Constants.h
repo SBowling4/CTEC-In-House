@@ -4,38 +4,42 @@
 class Constants {
   public:
     //Port definitions
-    static const int leftMotorPort = 1;
-    static const int elevatorMotorPort = 2;
-    static const int leftEncoderPort = 1;
-    static const int elevatorEncoderPort = 2;
-    static const int hServoPort = 3;
-    static const int clawServoPort = 4; 
-    static const int wristServoPort = 5;
-    static const int ultraSonicSensorPort = 6;
-    static const int lineFinderSensorPort = 7;
+    static const int driveMotorsPort;
+    static const int elevatorMotorsPort;
+    static const int driveEncoderPort;
+    static const int elevatorEncoderPort;
+    static const int hServoPort;
+    static const int clawServoPort ;
+    static const int wristServoPort;
+    static const int ultraSonicSensorPort;
+    static const int lineFinderSensorPort;
 
     //Servo conversion
-    static const double SERVO_ROTATIONS_PER_INCH = 0.0; //tune 
-
-    static const double encoderTicksToInches[2] = {0.0, 0.0}; 
-
-    static const double BOT_RADIUS_INCHES = 0;
+    static const double hDriveServoRotationsPerInch;
+    static const double driveEncoderTicksToInches;
+    static const double elevatorEncoderTicksToInches;
+     
 
     //Enum for wrist state
     enum WristState {
-        UP,
-        DOWN
+        UP = 0,
+        DOWN = 0,
     };
 
     enum ClawState {
-      OPEN,
-      CLOSE
+      OPEN = 0,
+      CLOSE = 0,
     };
 
-    static const int wristUpPos = 0;
-    static const int wristDownPos = 0;
-    static const int clawOpenPos = 0;
-    static const int clawClosePos = 0;
+    enum ElevatorState{
+      SUPPORTING = 0,
+      L2 = 0,
+      L3 = 0,
+      L4 = 0,
+      INTAKE = 0,
+      BASE = 0,
+    };
+
 
 };
 
