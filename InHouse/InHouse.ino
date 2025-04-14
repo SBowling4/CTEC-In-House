@@ -11,76 +11,66 @@ PIDController elevatorPIDController(0, 0, 0); //initialize PID controller object
 double cumulativeRotations = 0;
 double previousRotation = 0;
 
-Constants::WristState wristState = Constants::UP; 
-Constant::ClawState clawState = Constants::CLOSE;
+Constants::WristState wristState = Constants::WristState::UP; 
+Constants::ClawState clawState = Constants::ClawState::CLOSE;
 
 void setup() {
+  //setup
   p.PrizmBegin(); //Intialize prizm
   
   // Reset encoders
-  p.resetEncoder(Constants::leftEncoderPort);
+  p.resetEncoder(Constants::driveEncoderPort);
   p.resetEncoder(Constants::elevatorEncoderPort);
 
-  elevatorPIDController.setTolerance(0); //tune, tolerance for elevator at position
+  elevatorPIDController.setTolerance(0.1); //tune, tolerance for elevator at position
 
   //setup end
-  startToRack();
+
+  //routine
+  supporting1();
 }
 
 void loop() {
   totalRotations(); // Track h-drive servo rotation
-  p.setMotorPower(Constants::elevatorMotorPort, 100 * elevatorPIDController.calculate(getDistance(Constants::elevatorEncoderPort))); //Calculates needed PID output
-}
-
-double getDistance(int channel) {
-  double ticks = p.readEncoderCount(channel); //read encoder ticks
-  return ticks / Constants::encoderTicksToInches[channel - 1]; //Returns the inches traveled, adjusts for array indexing
+  p.setMotorPower(Constants::elevatorMotorsPort, 100 * elevatorPIDController.calculate(getDistance(Constants::elevatorEncoderPort, false))); //Calculates needed PID output
 }
 
 void moveElevatorToPosition(double targetPosition) {
   elevatorPIDController.setSetpoint(targetPosition); //Sets elevator setpoint to new position
 }
 
-void waitUntilElevatorInPosition() {
+void waitUntilElevatorInPosition(double timeout) {
   unsigned long startTime = millis() / 1000;
   //While loop that just stalls code until elevator is ready
   while (!elevatorPIDController.atSetpoint()) {
     unsigned long currentTime = millis() / 1000;
-    if (currentTime - startTime > 4) {
+    if (currentTime - startTime > timeout) {
       Serial.println("Unable to move elevator to position within time, cancelling");
       break;
     }
   }
 }
 
-void driveLefthMotorDistance(double inches, int power) {
-  double startDistance = getDistance(Constants::leftEncoderPort); //Finds the starting distance 
+void driveMotorDistance(double inches, int power) {
+  double startDistance = getDistance(Constants::driveEncoderPort, true); //Finds the starting distance 
   double currentDistance = startDistance; //Initiaizes current distance variable
   
   //Cheks if we've traveled desired distance
   while (abs(currentDistance - startDistance) < inches) {
-    p.setMotorPower(Constants::leftMotorPort, power); //Sets motor powers
-    currentDistance = getDistance(Constants::leftEncoderPort); //Updates current distance
+    p.setMotorPower(Constants::driveMotorsPort, power); //Sets motor powers
+    currentDistance = getDistance(Constants::driveEncoderPort, false); //Updates current distance
   }
 
-  p.setMotorPower(Constants::leftMotorPort, 125); //brakes when done
-}
-
-void rotateRight90() {
-  driveLeftMotorDistance(2 * M_PI * Constants::BOT_RADIUS_INCHES * (90/360), 100);
-}
-
-void rotateLeft90() {
-  driveLeftMotorDistance(2 * M_PI * Constants::BOT_RADIUS_INCHES * (90/360), -100);
+  p.setMotorPower(Constants::driveMotorsPort, 125); //brakes when done
 }
 
 void driveHDistance(double inches, int power) {
-  double startDistance = getHDistance(); //Finds starting distance
+  double startDistance = getHDistance(true); //Finds starting distance
   double currentDistance = startDistance; //Initializes current distance
   
   while ((currentDistance - startDistance) < inches) {
     p.setCRServoState(Constants::hServoPort, power); //Sets h-drive servo to power
-    currentDistance = getHDistance(); //Updates current distance
+    currentDistance = getHDistance(false); //Updates current distance
   }
   
   p.setCRServoState(Constants::hServoPort, 0); // Stop servo
@@ -90,8 +80,25 @@ void driveH(int power) {
   p.setCRServoState(Constants::hServoPort, power);
 }
 
-double getHDistance() {
-  return cumulativeRotations / Constants::SERVO_ROTATIONS_PER_INCH; //Finds distance by dividing total rotations by conversion factor
+void driveMotor(int power) {
+  p.setMotorPower(Constants::driveMotorsPort, power);
+}
+
+double getDistance(int port, bool reset) {
+  if (reset) {
+    p.resetEncoder(port);
+  }
+
+  double ticks = p.readEncoderCount(port); //read encoder ticks
+  return ticks / (port == 1 ? Constants::driveEncoderTicksToInches : Constants::elevatorEncoderTicksToInches);
+}
+
+double getHDistance(bool reset) {
+  if (reset) {
+    cumulativeRotations = 0;
+    return cumulativeRotations / Constants::hDriveServoRotationsPerInch;
+  }
+  return cumulativeRotations / Constants::hDriveServoRotationsPerInch; //Finds distance by dividing total rotations by conversion factor
 }
 
 bool getLF() {
@@ -102,45 +109,39 @@ int getUS() {
   return p.readSonicSensorCM(Constants::ultraSonicSensorPort);
 }
 
-void startToRack() {
-  while (!getLF()) {
-    driveH(100);
-  }
-  driveHDistance(12, 100);
-  rotateRight90();
-  while (!getLF()) {
-    driveHDistance(38, 100);
-  }
+void startToArray() {
+  driveMotorDistance(40, 100);
+}
+
+void supporting() {
+  elevatorPIDController.setSetpoint(Constants::ElevatorState::SUPPORTING);
+  waitUntilElevatorInPosition(4);
+  wrist(Constants::WristState::DOWN);
+  claw(Constants::ClawState::OPEN);
+}
+
+void base() {
+  elevatorPIDController.setSetpoint(Constants::ElevatorState::BASE);
+  wrist(Constants::WristState::UP);
+  claw(Constants::ClawState::OPEN);
 }
 
 void wrist(Constants::WristState target) {
-  switch (target) {
-    case Constants::UP:
-      p.setServoPosition(Constants::wristServoPort, Constants::wristUpPos);
-      break;
-    case Constants::DOWN:
-      p.setServoPosition(Constants::wristServoPort, Constants::wristDownPos);
-      break;
-  }
+  p.setServoPosition(Constants::wristServoPort, target);
 
   wristState = target;
 }
 
 void claw(Constants::ClawState target) {
-  switch (target) {
-    case Constants::ClOSE:
-      p.setServoPosition(Constants::clawServoPort, Constants::clawClosePos);
-      break;
-    case Constants::OPEN:
-      p.setServoPosition(Constants::clawServoPort, Constants::clawOpenPos);
-      break;
-  }
+  p.setServoPosition(Constants::clawServoPort, target);
 
   clawState = target;
 }
 
-void rackAuto() {
-  startToRack();
+void supporting1() {
+  startToArray();
+  supporting();
+  base();
 }
 
 //look familiar mcleod?
