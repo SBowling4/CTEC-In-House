@@ -2,18 +2,52 @@
 #include <Arduino.h>
 #include <stdlib.h>
 
+//Constructor for kp and kd
 PIDController::PIDController(double kp, double kd) {
-  PIDController(kp, 0, kd);
+  this->kp = kp;
+  this->ki = 0;
+  this->kd = kd;
+
+  this->lastTime = 0;
+  this->lastError = 0;
+  this->totalError = 0;
+  this->error = 0;
+  this->tolerance = 0;
+  this->maximumIntegral = 1;
+  this->minimumIntegral = -1;
 }
 
+//Default constructor
 PIDController::PIDController() {
-  PIDController(0, 0, 0);
+  this->kp = 0;
+  this->ki = 0;
+  this->kd = 0;
+
+  this->lastTime = 0;
+  this->lastError = 0;
+  this->totalError = 0;
+  this->error = 0;
+  this->tolerance = 0;
+  this->maximumIntegral = 1;
+  this->minimumIntegral = -1;
 }
 
+//Constructor with just kp
 PIDController::PIDController(double kp) {
-  PIDController(kp, 0, 0);
+  this->kp = kp;
+  this->ki = 0;
+  this->kd = 0;
+
+  this->lastTime = 0;
+  this->lastError = 0;
+  this->totalError = 0;
+  this->error = 0;
+  this->tolerance = 0;
+  this->maximumIntegral = 1;
+  this->minimumIntegral = -1;
 }
 
+// Constructor with all parameters
 PIDController::PIDController(double kp, double ki, double kd) {
   this->kp = kp;
   this->ki = ki;
