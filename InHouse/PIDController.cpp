@@ -29,22 +29,21 @@ PIDController::PIDController(double kp, double ki, double kd) {
 }
 
 double PIDController::calculate(double measure) {
-    // Get current time
-    unsigned long currentTime = millis();
-    double dt = (currentTime - lastTime) / 1000.0; // Convert to seconds
-    if (dt <= 0) dt = 0.001; // Avoid division by zero
+    unsigned long currentTime = millis(); //Get current time
+    double dt = (currentTime - lastTime) / 1000.0; //Convert to seconds
+    if (dt <= 0) dt = 0.001; //Avoid division by zero
     
-    lastTime = currentTime;
+    lastTime = currentTime; //Updates kast time
 
-    error = setpoint - measure;
-    double de = error - lastError;
-    lastError = error;
+    error = setpoint - measure; //Finds the error 
+    double de = error - lastError; //Finds the difference in error
+    lastError = error; //Updates last error to current error
 
-    totalError = constrain((totalError + error) * dt, minimumIntegral / ki, maximumIntegral / ki);
+    totalError = constrain((totalError + error) * dt, minimumIntegral / ki, maximumIntegral / ki); //Adds to total error, clamps it
 
-    double derivative = de/dt;
+    double derivative = de/dt; //Calculates the derivative of error
 
-    return kp * error + kd * derivative + ki * totalError;
+    return kp * error + kd * derivative + ki * totalError; //Calculates output
 }
 
 void PIDController::setTolerance(double tolerance) {
