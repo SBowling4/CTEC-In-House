@@ -3,9 +3,9 @@
 
 class PIDController {
     public:
-        double kp;
-        double kd;
-        double ki;
+        double kP;
+        double kD;
+        double kI;
 
         double setpoint;
 
@@ -21,16 +21,16 @@ class PIDController {
 
 
         // Constructor with kp and kd
-        PIDController(double kp, double kd);
+        PIDController(double kP, double kD);
 
         //Constructor with all
-        PIDController(double kp, double ki, double kd);
+        PIDController(double kP, double kI, double kD);
         
         // Default constructor, sets to 0
         PIDController();
         
         // Constructor with just kp
-        PIDController(double kp);
+        PIDController(double kP);
 
         // Calculate the control output, should be called periodically
         double calculate(double measure);
