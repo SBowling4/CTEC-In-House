@@ -18,6 +18,9 @@ class Constants {
     static const double hDriveServoRotationsPerInch;
     static const double driveEncoderTicksToInches;
     static const double elevatorEncoderTicksToInches;
+
+    static const double elevatorTolerance;
+    static const double wristTolerance; 
      
 
     //Enum for wrist state
