@@ -18,3 +18,6 @@ const double Constants::hDriveServoRotationsPerInch = 0.0; //tune
 const double Constants::driveEncoderTicksToInches = 0.0; //tune
 const double Constants::elevatorEncoderTicksToInches = 0.0; //tune
 
+const double Constants::elevatorTolerance = 0.0;
+const double Constants::wristTolerance = 0.0;
+
