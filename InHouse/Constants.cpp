@@ -8,7 +8,7 @@ const int Constants::elevatorEncoderPort = 2;
 const int Constants::hServoPort = 3;
 const int Constants::clawServoPort = 4;
 const int Constants::wristServoPort = 5;
-const int Constants::ultraSonicSensorPort = 6;
+const int Constants::sonicSensorPort = 6;
 const int Constants::lineFinderSensorPort = 7;
 
 //Define servo conversion constants
@@ -20,4 +20,8 @@ const double Constants::elevatorEncoderTicksToInches = 0.0; //tune
 
 const double Constants::elevatorTolerance = 0.0;
 const double Constants::wristTolerance = 0.0;
+
+const double Constants::elevatorkP = 0.0;
+const double Constants::elevatorkI = 0.0;
+const double Constants::elevatorkD = 0.0;
 

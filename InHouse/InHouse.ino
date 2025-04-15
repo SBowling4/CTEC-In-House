@@ -1,12 +1,11 @@
 #include <PRIZM.h>
 #include "PIDController.h"
 #include "Constants.h" 
-#include <math.h>
 
 PRIZM p; //Initialize prizm object
 
 //I made this myself, I can add the files to submission if you want
-PIDController elevatorPIDController(0, 0, 0); //initialize PID controller object, tune
+PIDController elevatorPIDController(Constants::elevatorkP, Constants::elevatorkI, Constants::elevatorkD); //initialize PID controller object, tune
 
 //Initializes h-drive rotation tracking
 double cumulativeRotations = 0;
@@ -19,7 +18,7 @@ Constants::ElevatorState elevatorState = Constants::ElevatorState::BASE;
 
 void setup() {
   //setup
-  p.PrizmBegin(); //Intialize prizm
+  p.PrizmBegin(); //Start prizm
   
   //Reset encoders
   p.resetEncoder(Constants::driveEncoderPort);
@@ -30,7 +29,7 @@ void setup() {
   //setup end
 
   //routine
-  supporting1();
+  supporting1DR();
 }
 
 void loop() {
@@ -59,6 +58,19 @@ void waitUntilWristInPosition(double timeout) {
     //If too much time has passed, leave
     if (currentTime - startTime > timeout) {
       Serial.println("Unable to move wrist to position within time, moving on");
+      break;
+    }
+  }
+}
+
+void waitUntilClawInPosition(double timeout) {
+    unsigned long startTime = millis() / 1000; //Gets start time
+  //While loop that just stalls code until elevator is ready
+  while (!wristAtSetpoint()) {
+    unsigned long currentTime = millis() / 1000; //Gets current time
+    //If too much time has passed, leave
+    if (currentTime - startTime > timeout) {
+      Serial.println("Unable to move claw to position within time, moving on");
       break;
     }
   }
@@ -117,13 +129,40 @@ int getLF() {
 }
 
 //Easier getter for sonic sensor
-int getUS() {
-  return p.readSonicSensorCM(Constants::ultraSonicSensorPort); 
+int getSonic() {
+  return p.readSonicSensorCM(Constants::sonicSensorPort); 
 }
 
 //Drives from start to the array
 void startToArray() {
   driveMotorDistance(40, 100); //Drives 40 inches, then stops
+}
+
+void lineToArray() {
+  driveMotorDistance(30, 100);
+}
+
+void startToGrid() {
+  driveHDistance(32, -100);
+  while (getLF() == 0) {
+    p.setMotorPower(Constants::driveMotorsPort, 100);
+  }
+}
+
+void gridToPickup() {
+  driveHDistance(1, -100);
+  while (getLF() == 0) {
+    p.setCRServoState(Constants::hServoPort, -100);
+  }
+  p.setCRServoState(Constants::hServoPort, 0);
+}
+
+void pickupToGrid() {
+  driveHDistance(1, 100);
+  while (getLF() == 0) {
+    p.setCRServoState(Constants::hServoPort, 100);
+  }
+  p.setCRServoState(Constants::hServoPort, 0);
 }
 
 //Moves superstructture to supporting beacon position, then scores
@@ -135,11 +174,28 @@ void supporting() {
   claw(Constants::ClawState::OPEN);
 }
 
+void l4() {
+  elevator(Constants::ElevatorState::L4);
+  wrist(Constants::WristState::UP);
+  waitUntilElevatorInPosition(5);
+  waitUntilWristInPosition(5);
+  claw(Constants::ClawState::OPEN);
+}
+
+void intake() {
+  claw(Constants::ClawState::OPEN);
+  elevator(Constants::ElevatorState::INTAKE);
+  wrist(Constants::WristState::DOWN);
+  waitUntilElevatorInPosition(5);
+  waitUntilWristInPosition(5);
+  waitUntilClawInPosition(5);
+  claw(Constants::ClawState::CLOSE);
+}
+
 //Moves superstructure to base position
 void base() {
   elevator(Constants::ElevatorState::BASE);
   wrist(Constants::WristState::UP);
-  claw(Constants::ClawState::OPEN);
 }
 
 //Sets wrist to target state
@@ -161,11 +217,35 @@ void elevator(Constants::ElevatorState target) {
   elevatorState = target;
 }
 
-//1 energy cell supporting beacon auto
-void supporting1() {
+//1 energy cell supporting beacon auto, dead reckoning
+void supporting1DR() {
   startToArray();
   supporting();
   base();
+}
+
+//I energy cell supporing beacon auto
+void supporting1() {
+  while (getLF() == 0) {
+    p.setMotorPower(Constants::driveMotorsPort, 100);
+  }
+  lineToArray();
+  supporting();
+  base();
+}
+
+void gridL4(int pieces) {
+  startToGrid();
+  l4();
+  base();
+  for (int i = 0; i < pieces - 1; i++) {
+    gridToPickup();
+    intake();
+    base();
+    pickupToGrid();
+    l4();
+    base();
+  }
 }
 
 //look familiar mcleod?

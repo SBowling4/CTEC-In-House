@@ -11,7 +11,7 @@ class Constants {
     static const int hServoPort;
     static const int clawServoPort ;
     static const int wristServoPort;
-    static const int ultraSonicSensorPort;
+    static const int sonicSensorPort;
     static const int lineFinderSensorPort;
 
     //Servo conversion
@@ -21,6 +21,12 @@ class Constants {
 
     static const double elevatorTolerance;
     static const double wristTolerance; 
+
+    static const double elevatorkP;
+    static const double elevatorkI;
+    static const double elevatorkD;
+
+
      
 
     //Enum for wrist state
