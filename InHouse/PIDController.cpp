@@ -4,9 +4,9 @@
 
 //Constructor for kp and kd
 PIDController::PIDController(double kp, double kd) {
-  this->kp = kp;
-  this->ki = 0;
-  this->kd = kd;
+  this->kP = kp;
+  this->kI = 0;
+  this->kD = kd;
 
   this->lastTime = 0;
   this->lastError = 0;
@@ -19,9 +19,9 @@ PIDController::PIDController(double kp, double kd) {
 
 //Default constructor
 PIDController::PIDController() {
-  this->kp = 0;
-  this->ki = 0;
-  this->kd = 0;
+  this->kP = 0;
+  this->kI = 0;
+  this->kD = 0;
 
   this->lastTime = 0;
   this->lastError = 0;
@@ -34,9 +34,9 @@ PIDController::PIDController() {
 
 //Constructor with just kp
 PIDController::PIDController(double kp) {
-  this->kp = kp;
-  this->ki = 0;
-  this->kd = 0;
+  this->kP = kp;
+  this->kI = 0;
+  this->kD = 0;
 
   this->lastTime = 0;
   this->lastError = 0;
@@ -49,9 +49,9 @@ PIDController::PIDController(double kp) {
 
 // Constructor with all parameters
 PIDController::PIDController(double kp, double ki, double kd) {
-  this->kp = kp;
-  this->ki = ki;
-  this->kd = kd;
+  this->kP = kp;
+  this->kI = ki;
+  this->kD = kd;
 
   this->lastTime = 0;
   this->lastError = 0;
@@ -67,33 +67,33 @@ double PIDController::calculate(double measure) {
     double dt = (currentTime - lastTime) / 1000.0; //Convert to seconds
     if (dt <= 0) dt = 0.001; //Avoid division by zero
     
-    lastTime = currentTime; //Updates kast time
+    lastTime = currentTime; //Updates last time
 
     error = setpoint - measure; //Finds the error 
     double de = error - lastError; //Finds the difference in error
     lastError = error; //Updates last error to current error
 
-    totalError = constrain((totalError + error) * dt, minimumIntegral / ki, maximumIntegral / ki); //Adds to total error, clamps it
+    totalError = constrain(totalError + error * dt, minimumIntegral / kI, maximumIntegral / kI); //Adds to total error, clamps it
 
     double derivative = de/dt; //Calculates the derivative of error
 
-    return kp * error + kd * derivative + ki * totalError; //Calculates output
+    return kP * error + kD * derivative + kI * totalError; //Calculates output
 }
 
 void PIDController::setTolerance(double tolerance) {
-    this->tolerance = tolerance;
+  this->tolerance = tolerance; //Sets the tolerance
 }
 
 bool PIDController::atSetpoint() {
-    if (tolerance != 0) {
-        return abs(error) < tolerance;
-    } else {
-        return false;
-    }
+  if (tolerance != 0) { //Double checks tolerance has been set
+      return abs(error) < tolerance;
+  } else {
+      return false;
+  }
 }
 
 void PIDController::setSetpoint(double setpoint) {
-    this->setpoint = setpoint;
+  this->setpoint = setpoint; //Updates the setpoint
 }
 
 void PIDController::setIntegralRange(double min, double max) {
