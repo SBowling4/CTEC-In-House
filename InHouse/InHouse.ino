@@ -200,21 +200,19 @@ void base() {
 
 //Sets wrist to target state
 void wrist(Constants::WristState target) {
-  p.setServoPosition(Constants::wristServoPort, target);
-
   wristState = target;
+  p.setServoPosition(Constants::wristServoPort, target);
 }
 
 //Sets claw to target state
 void claw(Constants::ClawState target) {
-  p.setServoPosition(Constants::clawServoPort, target);
-
   clawState = target;
+  p.setServoPosition(Constants::clawServoPort, target);
 }
 
 void elevator(Constants::ElevatorState target) {
-  elevatorPIDController.setSetpoint(target);
   elevatorState = target;
+  elevatorPIDController.setSetpoint(target);
 }
 
 //1 energy cell supporting beacon auto, dead reckoning
