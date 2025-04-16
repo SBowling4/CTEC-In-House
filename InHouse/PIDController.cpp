@@ -88,6 +88,7 @@ bool PIDController::atSetpoint() {
   if (tolerance != 0) { //Double checks tolerance has been set
       return abs(error) < tolerance;
   } else {
+      Serial.println("Tolerance not set");
       return false;
   }
 }

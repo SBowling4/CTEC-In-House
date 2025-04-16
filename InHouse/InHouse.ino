@@ -165,6 +165,17 @@ void pickupToGrid() {
   p.setCRServoState(Constants::hServoPort, 0);
 }
 
+void arrayToLine() {
+  while (getLF() == 0) {
+    p.setMotorPower(Constants::driveMotorsPort, -100);
+  }
+  p.setMotorPower(Constants::sonicSensorPort, 125);
+}
+
+void closeLineToPark() {
+  driveHDistance(34, -100);
+}
+
 //Moves superstructture to supporting beacon position, then scores
 void supporting() {
   elevator(Constants::ElevatorState::SUPPORTING);
@@ -175,6 +186,22 @@ void supporting() {
 }
 
 void l4() {
+  elevator(Constants::ElevatorState::L4);
+  wrist(Constants::WristState::UP);
+  waitUntilElevatorInPosition(5);
+  waitUntilWristInPosition(5);
+  claw(Constants::ClawState::OPEN);
+}
+
+void l3() {
+  elevator(Constants::ElevatorState::L4);
+  wrist(Constants::WristState::UP);
+  waitUntilElevatorInPosition(5);
+  waitUntilWristInPosition(5);
+  claw(Constants::ClawState::OPEN);
+}
+
+void l2() {
   elevator(Constants::ElevatorState::L4);
   wrist(Constants::WristState::UP);
   waitUntilElevatorInPosition(5);
@@ -232,6 +259,17 @@ void supporting1() {
   base();
 }
 
+void supporting1Park() {
+  while (getLF() == 0) {
+    p.setMotorPower(Constants::driveMotorsPort, 100);
+  }
+  lineToArray();
+  supporting();
+  base();
+  arrayToLine();
+  closeLineToPark();
+}
+
 void gridL4(int pieces) {
   startToGrid();
   l4();
@@ -246,6 +284,34 @@ void gridL4(int pieces) {
   }
 }
 
+void gridL4L3() {
+  startToGrid();
+  l4();
+  base();
+  gridToPickup();
+  intake();
+  base();
+  pickupToGrid();
+  l3();
+}
+
+void gridL4L3L2() {
+  startToGrid();
+  l4();
+  base();
+  gridToPickup();
+  intake();
+  base();
+  pickupToGrid();
+  l3();
+  base();
+  gridToPickup();
+  intake();
+  base();
+  pickupToGrid();
+  l2();
+
+}
 //look familiar mcleod?
 void totalRotations() {
     double currentRotation = p.readServoPosition(Constants::hServoPort); //Gets the current rotation from servo
