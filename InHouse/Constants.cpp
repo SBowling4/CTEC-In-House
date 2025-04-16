@@ -5,11 +5,11 @@ const int Constants::driveMotorsPort = 1;
 const int Constants::elevatorMotorsPort = 2;
 const int Constants::driveEncoderPort = 1;
 const int Constants::elevatorEncoderPort = 2;
-const int Constants::hServoPort = 3;
-const int Constants::clawServoPort = 4;
-const int Constants::wristServoPort = 5;
-const int Constants::sonicSensorPort = 6;
-const int Constants::lineFinderSensorPort = 7;
+const int Constants::hServoPort = 1;
+const int Constants::clawServoPort = 2;
+const int Constants::wristServoPort = 3;
+const int Constants::sonicSensorPort = 4;
+const int Constants::lineFinderSensorPort = 5;
 
 //Define servo conversion constants
 const double Constants::hDriveServoRotationsPerInch = 0.0; //tune
