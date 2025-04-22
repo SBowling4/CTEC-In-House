@@ -21,10 +21,15 @@ class Constants {
 
     static const double elevatorTolerance;
     static const double wristTolerance; 
+    static const double clawTolerance;
 
     static const double elevatorkP;
     static const double elevatorkI;
     static const double elevatorkD;
+
+    static const double wristkP;
+    static const double wristkI;
+    static const double wristkD;
 
 
      

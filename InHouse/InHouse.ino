@@ -6,6 +6,7 @@ PRIZM p; //Initialize prizm object
 
 //I made this myself, I can add the files to submission if you want
 PIDController elevatorPIDController(Constants::elevatorkP, Constants::elevatorkI, Constants::elevatorkD); //initialize PID controller object, tune
+PIDController wristPIDController(Constants::wristkP, Constants::wristkI, Constants::wristkD);
 
 //Initializes h-drive rotation tracking
 double cumulativeRotations = 0;
@@ -25,6 +26,7 @@ void setup() {
   p.resetEncoder(Constants::elevatorEncoderPort);
 
   elevatorPIDController.setTolerance(Constants::elevatorTolerance); //tune, tolerance for elevator at position
+  wristPIDController.setTolerance(Constants::wristTolerance);
 
   //setup end
 
@@ -35,6 +37,7 @@ void setup() {
 void loop() {
   totalRotations(); //Track h-drive servo rotation
   p.setMotorPower(Constants::elevatorMotorsPort, 100 * elevatorPIDController.calculate(getDistance(Constants::elevatorEncoderPort, false))); //Calculates needed PID output
+  p.setCRServoState(Constants::wristServoPort, 100 * wristPIDController.calculate(p.readServoPosition(Constants::wristServoPort)));
 }
 
 void waitUntilElevatorInPosition(double timeout) {
@@ -53,7 +56,7 @@ void waitUntilElevatorInPosition(double timeout) {
 void waitUntilWristInPosition(double timeout) {
   unsigned long startTime = millis() / 1000; //Gets start time
   //While loop that just stalls code until elevator is ready
-  while (!wristAtSetpoint()) {
+  while (!wristPIDController.atSetpoint()) {
     unsigned long currentTime = millis() / 1000; //Gets current time
     //If too much time has passed, leave
     if (currentTime - startTime > timeout) {
@@ -66,7 +69,7 @@ void waitUntilWristInPosition(double timeout) {
 void waitUntilClawInPosition(double timeout) {
     unsigned long startTime = millis() / 1000; //Gets start time
   //While loop that just stalls code until elevator is ready
-  while (!wristAtSetpoint()) {
+  while (!clawAtSetpoint()) {
     unsigned long currentTime = millis() / 1000; //Gets current time
     //If too much time has passed, leave
     if (currentTime - startTime > timeout) {
@@ -76,8 +79,8 @@ void waitUntilClawInPosition(double timeout) {
   }
 }
 
-bool wristAtSetpoint() {
-  return abs(p.readServoPosition(Constants::wristServoPort) - wristState) < Constants::wristTolerance; //Returns if wrist is within tolerance 
+bool clawAtSetpoint() {
+  return abs(p.readServoPosition(Constants::clawServoPort) - clawState) <= Constants::clawTolerance;
 }
 
 void driveMotorDistance(double inches, int power) {
@@ -234,7 +237,7 @@ void wrist(Constants::WristState target) {
 //Sets claw to target state
 void claw(Constants::ClawState target) {
   clawState = target;
-  p.setServoPosition(Constants::clawServoPort, target);
+  wristPIDController.setSetpoint(target);
 }
 
 void elevator(Constants::ElevatorState target) {

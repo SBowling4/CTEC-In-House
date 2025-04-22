@@ -20,8 +20,13 @@ const double Constants::elevatorEncoderTicksToInches = 0.0; //tune
 
 const double Constants::elevatorTolerance = 0.0;
 const double Constants::wristTolerance = 0.0;
+const double Constants::clawTolerance = 0.0;
 
 const double Constants::elevatorkP = 0.0;
 const double Constants::elevatorkI = 0.0;
 const double Constants::elevatorkD = 0.0;
+
+const double Constants::wristkP = 0.0;
+const double Constants::wristkI = 0.0;
+const double Constants::wristkD = 0.0;
 
