@@ -19,9 +19,6 @@ class PIDController {
         double minimumIntegral;
         double maximumIntegral;
 
-        bool hasSetpoint;
-        double setpoint;
-
 
         // Constructor with kp and kd
         PIDController(double kP, double kD);
@@ -35,9 +32,6 @@ class PIDController {
         // Constructor with just kp
         PIDController(double kP);
 
-        //Supplies calculate with a setpoint
-        double calculate(double measure, double setpoint)
-
         // Calculate the control output, should be called periodically
         double calculate(double measure);
 
@@ -47,6 +41,8 @@ class PIDController {
         // Check if controller is at the setpoint using tolerance
         bool atSetpoint();
 
+        //Updates setpoint
+        void setSetpoint(double setpoint);
 
         //Sets the minimum and maximum for integral
         void setIntegralRange(double min, double max);

@@ -9,17 +9,12 @@ PIDController::PIDController(double kp, double kd) {
   this->kD = kd;
 
   this->lastTime = 0;
-  
   this->lastError = 0;
   this->totalError = 0;
   this->error = 0;
   this->tolerance = 0;
-
   this->maximumIntegral = 1;
   this->minimumIntegral = -1;
-
-  this->hasSetpoint = false;
-  this->setpoint = 0;
 }
 
 //Default constructor
@@ -29,17 +24,12 @@ PIDController::PIDController() {
   this->kD = 0;
 
   this->lastTime = 0;
-  
   this->lastError = 0;
   this->totalError = 0;
   this->error = 0;
   this->tolerance = 0;
-
   this->maximumIntegral = 1;
   this->minimumIntegral = -1;
-
-  this->hasSetpoint = false;
-  this->setpoint = 0;
 }
 
 //Constructor with just kp
@@ -49,17 +39,12 @@ PIDController::PIDController(double kp) {
   this->kD = 0;
 
   this->lastTime = 0;
-  
   this->lastError = 0;
   this->totalError = 0;
   this->error = 0;
   this->tolerance = 0;
-
   this->maximumIntegral = 1;
   this->minimumIntegral = -1;
-
-  this->hasSetpoint = false;
-  this->setpoint = 0;
 }
 
 // Constructor with all parameters
@@ -69,24 +54,12 @@ PIDController::PIDController(double kp, double ki, double kd) {
   this->kD = kd;
 
   this->lastTime = 0;
-  
   this->lastError = 0;
   this->totalError = 0;
   this->error = 0;
   this->tolerance = 0;
-
   this->maximumIntegral = 1;
   this->minimumIntegral = -1;
-
-  this->hasSetpoint = false;
-  this->setpoint = 0;
-}
-
-double PIDController::calculate(double measure, double setpoint) {
-  this->hasSetpoint = true;
-  this->setpoint = setpoint;
-
-  return calculate(measure);
 }
 
 double PIDController::calculate(double measure) {
@@ -112,16 +85,16 @@ void PIDController::setTolerance(double tolerance) {
 }
 
 bool PIDController::atSetpoint() {
-  if (!hasSetpoint) {
-    return false;
-  }
-
   if (tolerance != 0) { //Double checks tolerance has been set
       return abs(error) < tolerance;
   } else {
       Serial.println("Tolerance not set");
       return false;
   }
+}
+
+void PIDController::setSetpoint(double setpoint) {
+  this->setpoint = setpoint; //Updates the setpoint
 }
 
 void PIDController::setIntegralRange(double min, double max) {
