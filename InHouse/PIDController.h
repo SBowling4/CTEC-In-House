@@ -20,7 +20,6 @@ class PIDController {
         double maximumIntegral;
 
         bool hasSetpoint;
-        double setpoint;
 
 
         // Constructor with kp and kd
@@ -36,7 +35,7 @@ class PIDController {
         PIDController(double kP);
 
         //Supplies calculate with a setpoint
-        double calculate(double measure, double setpoint)
+        double calculate(double measure, double setpoint);
 
         // Calculate the control output, should be called periodically
         double calculate(double measure);

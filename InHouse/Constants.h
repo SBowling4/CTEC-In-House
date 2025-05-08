@@ -32,8 +32,8 @@ class Constants {
     };
 
     enum ClawState {
-      OPEN = 0,
-      CLOSE = 0,
+      OPEN = 125,
+      CLOSE = 90,
     };
 
 
