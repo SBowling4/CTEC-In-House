@@ -5,4 +5,4 @@ Programmer: Sam Bowling
 
 Systems Engineer: Xavier Kenfe
 
-Mentors: Jackson Pursell, Carter Tollman
+Mentors: Jackson Pursell
