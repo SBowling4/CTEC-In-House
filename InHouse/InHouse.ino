@@ -5,13 +5,6 @@
 
 PRIZM p; //Initialize prizm object
 
-//I made this myself, I can add the files to submission if you want
-PIDController wristPIDController(Constants::wristkP, Constants::wristkI, Constants::wristkD);
-
-//Initializes h-drive rotation tracking
-double cumulativeRotations = 0;
-double previousRotation = 0;
-
 //Creates state trackers
 Constants::ClawState clawState = Constants::ClawState::CLOSE;
 
@@ -27,21 +20,13 @@ void setup() {
 
   p.setMotorInvert(1, 1);
 
-  wristPIDController.setTolerance(Constants::wristTolerance);
-
   //setup end
 
   //routine
   rack();
 }
 
-void loop() {
-  Serial.println("Raw: " + p.readEncoderCount(Constants::driveEncoderPort));
-  Serial.print("Dist: ");
-  Serial.println(getDistance(false));
-  totalRotations(); //Track h-drive servo rotation
-  p.setCRServoState(Constants::wristServoPort, 100 * wristPIDController.calculate(p.readServoPosition(Constants::wristServoPort)));
-}
+void loop() {}
 
 void drive(int power) {
   if (power == 125) {
@@ -52,20 +37,6 @@ void drive(int power) {
   int leftSpeed = power / 1.8;
   int rightSpeed = power;
   p.setMotorPowers(leftSpeed, rightSpeed);
-}
-
-
-void waitUntilWristInPosition(double timeout) {
-  unsigned long startTime = millis() / 1000; //Gets start time
-  //While loop that just stalls code until elevator is ready
-  while (!wristPIDController.atSetpoint()) {
-    unsigned long currentTime = millis() / 1000; //Gets current time
-    //If too much time has passed, leave
-    if (currentTime - startTime > timeout) {
-      Serial.println("Unable to move wrist to position within time, moving on");
-      break;
-    }
-  }
 }
 
 void waitUntilClawInPosition(double timeout) {
@@ -99,18 +70,6 @@ void driveMotorDistance(double inches, int power) {
   p.setMotorPower(Constants::rightDrivePort, 125); //brakes when done
 }
 
-void driveHDistance(double inches, int power) {
-  double startDistance = getHDistance(true); //Finds starting distance
-  double currentDistance = startDistance; //Initializes current distance
-  
-  while ((currentDistance - startDistance) < inches) {
-    p.setCRServoState(Constants::hServoPort, power); //Sets h-drive servo to power
-    currentDistance = getHDistance(false); //Updates current distance
-  }
-  
-  p.setCRServoState(Constants::hServoPort, 0); //Stop servo
-}
-
 double getDistance(bool reset) {
   if (reset) {
     p.resetEncoder(Constants::driveEncoderPort); //Resets
@@ -118,21 +77,6 @@ double getDistance(bool reset) {
 
   double ticks = p.readEncoderCount(Constants::driveEncoderPort); //read encoder ticks
   return ticks / Constants::driveEncoderTicksToInches; //Converts ticks to inches based off of conversion factor
-}
-
-//Gets the distance the H servo has driven, resets when being initially called because it is always tracking its distance
-double getHDistance(bool reset) {
-  if (reset) {
-    cumulativeRotations = 0; //Resets distance
-    return cumulativeRotations / Constants::hDriveServoRotationsPerInch; //Finds distance by dividing total rotations by conversion factor
-  }
-  return cumulativeRotations / Constants::hDriveServoRotationsPerInch; //Finds distance by dividing total rotations by conversion factor
-}
-
-
-//Sets wrist to target state
-void wrist(Constants::WristState target) {
-  wristPIDController.calculate(p.readServoPosition(2), target);
 }
 
 //Sets claw to target state
@@ -208,23 +152,3 @@ void rotateCW90() {
   p.setMotorPowers(125, 125);
 }
 
-//look familiar mcleod?
-void totalRotations() {
-    double currentRotation = p.readServoPosition(Constants::hServoPort); //Gets the current rotation from servo
-
-    //Calculate the delta, accounting for wraparound
-    double delta = currentRotation - previousRotation;
-
-    //Adjust for wraparound cases
-    if (delta > 0.5) {
-        delta -= 1.0; //Wrapped from 1.0 to 0.0 (moving backward)
-    } else if (delta < -0.5) {
-        delta += 1.0; //Wrapped from 0.0 to 1.0 (moving forward)
-    }
-
-    //Update cumulative position 
-    cumulativeRotations += delta; 
-
-    //Store for next
-    previousRotation = currentRotation;
-}
