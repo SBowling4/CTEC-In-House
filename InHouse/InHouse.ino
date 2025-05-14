@@ -13,7 +13,6 @@ double cumulativeRotations = 0;
 double previousRotation = 0;
 
 //Creates state trackers
-Constants::WristState wristState = Constants::WristState::UP; 
 Constants::ClawState clawState = Constants::ClawState::CLOSE;
 
 void setup() {
@@ -133,7 +132,6 @@ double getHDistance(bool reset) {
 
 //Sets wrist to target state
 void wrist(Constants::WristState target) {
-  wristState = target;
   wristPIDController.calculate(p.readServoPosition(2), target);
 }
 
@@ -177,7 +175,7 @@ void rack() {
   rotateCCW90();
 
   drive(100);
-  delay(850);
+  delay(750);
   drive(125);
 
   delay(250);
@@ -191,6 +189,8 @@ void rack() {
 
   claw(Constants::OPEN);
   waitUntilClawInPosition(3);
+  p.setCRServoState(Constants::wristServoPort, -100);
+  delay(1000);
   drive(-100);
   delay(500);
   drive(125);
@@ -204,7 +204,7 @@ void rotateCCW90() {
 
 void rotateCW90() {
   p.setMotorPowers(100, -100);
-  delay(500);
+  delay(450);
   p.setMotorPowers(125, 125);
 }
 
